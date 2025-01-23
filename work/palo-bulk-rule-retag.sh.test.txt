@@ -1,0 +1,8 @@
+set device-group VSYS1 pre-rulebase security rules "Block High risk IP addresses - IN" action drop
+set device-group VSYS1 pre-rulebase security rules "Block High risk IP addresses - IN" tag DENY
+set device-group VSYS1 pre-rulebase security rules "Block High risk IP addresses - OUT" action deny
+set device-group VSYS1 pre-rulebase security rules "Block High risk IP addresses - OUT" tag DENY
+set device-group VSYS1 post-rulebase security rules "Block Known Malicious Malware IPs - IN" action drop
+set device-group VSYS1 post-rulebase security rules "Block Known Malicious Malware IPs - IN" tag DENY
+set device-group VSYS1 post-rulebase security rules "Block Known Malicious Malware IPs - OUT" action deny
+set device-group VSYS1 post-rulebase security rules "Block Known Malicious Malware IPs - OUT" tag DENY
