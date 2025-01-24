@@ -1,5 +1,5 @@
 #!/usr/bin/env nix-shell
-#! nix-shell -i gawk
+#! nix-shell -i "gawk -f"
 #! nix-shell -p gawk
 
 # serve a web page on localhost:8080
