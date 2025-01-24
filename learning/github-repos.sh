@@ -16,38 +16,28 @@ call () {
 	# call "users" or call "orgs"
 	full_URL=$URL'/'$1'/'$input'/repos'
 	output=$(curl -s "$full_URL")
-	output=$(echo $output | sed 's/, /\\n/g')
-}
-
-display () {
-	# User/Repo
-	echo -e $output | grep $1 | cut -d' ' -f 2 | sed 's/.$//' | sed 's/^.//'
-
-	# Repo
-	#echo -e $output | grep $1 | cut -d' ' -f 2 | sed 's/.$//' | sed 's/^.//' | sed -n 's/[^\/]*\///p'
 }
 
 check () {
-	if [[ $(echo -e $output | head -n1) == "[ ]" || $(echo -e $output | head -n1 | grep "Not Found") ]]; then
-		FOUND=0
+	if ! grep -q "Not Found" <<< "$output"; then
+		return 1
 	else
-		FOUND=1
+		return 0
 	fi
 }
 
 # Was the input a user?
 call "users"
-check
-if [[ $FOUND == 0 ]]; then
+if check; then
 	# Didn't work, try orgs
-	echo Error: User not found
 	call "orgs"
-	if [[ $FOUND == 0 ]]; then
+	if check; then
+		# Still didn't work
 		echo Error: User / Org not found
+		exit 1
 	fi
-	exit 1
 fi
 
 echo "$1's repos are:"
-display "full_name"
+grep "full_name" <<< "$output" | tr -s ' ' | cut -d' ' -f 3 | sed 's/",$//' | sed 's/^"//'
 
