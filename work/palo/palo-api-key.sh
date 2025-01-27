@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Interact with Palo Alto API for SOC alerts
+# Verify and refresh Palo Alto API key
 set -eou pipefail
 
 readonly PALO_FQDN='.palo_fqdn'
