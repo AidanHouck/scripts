@@ -3,12 +3,11 @@
 # Interact with Palo Alto API for SOC alerts
 set -eou pipefail
 
-readonly PALO_FQDN='.palo_fqdn'
 readonly PALO_USER='.palo_user'
-readonly PALO_PASS='.palo_pass'
 readonly PALO_API='.palo_api'
 
-readonly PANO="$(cat .palo_fqdn)"
+PANO="$(cat .palo_fqdn)"
+readonly PANO
 
 # Check if anyone else has a lock
 check_pan_lock() {
