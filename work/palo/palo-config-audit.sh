@@ -1,30 +1,27 @@
 #!/usr/bin/env bash
 
-# Query Panorama for pending changes
+# Query Panorama for pending changes via SSH
 set -eou pipefail
 
-readonly PALO_API='.palo_api'
+readonly PALO_FQDN='.palo_fqdn'
+readonly PALO_USER='.palo_user'
 
-PANO="$(cat .palo_fqdn)"
-readonly PANO
+ssh_output=$(ssh -q -o StrictHostKeyChecking=no \
+	"$(cat "$PALO_USER")@$(cat "$PALO_FQDN")" << EOF
+set cli scripting-mode on
+set cli config-output-format set
 
-# Preview panorama config diff
-preview_pan_diff() {
-	config_running=$(curl -H "X-PAN-KEY: $(cat "$PALO_API")" \
-		-X POST "https://${PANO}/api" \
-		--data-urlencode "type=op" \
-		--data-urlencode "cmd=<show><config><running/></config></show>" \
-		-s)
+show config diff
+exit
 
-	config_candidate=$(curl -H "X-PAN-KEY: $(cat "$PALO_API")" \
-		-X POST "https://${PANO}/api" \
-		--data-urlencode "type=op" \
-		--data-urlencode "cmd=<show><config><candidate/></config></show>" \
-		-s)
+EOF
+)
 
-	diff -u -B <(echo "$config_running") <(echo "$config_candidate") | tail -n +4 | less -FXRfM
-}
+prompt="$(cat "$PALO_USER")@Panorama> "
+prompt_3x="${prompt}${prompt}${prompt}"
 
-./palo-api-key.sh
-preview_pan_diff
+printf %s "$ssh_output" | \
+	tr '\n' '~' | \
+	sed 's/.*'"${prompt_3x}"'\(.*\)'"${prompt}"'/\1/g' | \
+	tr '~' '\n'
 
