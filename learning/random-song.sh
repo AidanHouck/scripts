@@ -11,7 +11,7 @@ load() {
 # random number
 high=3
 low=1
-randNum=$(python3 -c "import random; print(random.randint($low, $high))")
+randNum=$((1 + $RANDOM % 3))
 
 # random 2 letters
 rand=$(echo "$RANDOM" | md5sum | head -c "$randNum")
