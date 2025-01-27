@@ -1,12 +1,16 @@
-#!/usr/bin/env bash
+#!/usr/bin/env nix-shell
+#! nix-shell -i bash
+#! nix-shell -p bash sshpass
 
 # Query Panorama for pending changes via SSH
 set -eou pipefail
 
 readonly PALO_FQDN='.palo_fqdn'
 readonly PALO_USER='.palo_user'
+readonly PALO_PASS='.palo_pass'
 
-ssh_output=$(ssh -q -o StrictHostKeyChecking=no \
+ssh_output=$(sshpass -f "$PALO_PASS" \
+	ssh -q -o StrictHostKeyChecking=no \
 	"$(cat "$PALO_USER")@$(cat "$PALO_FQDN")" << EOF
 set cli scripting-mode on
 set cli config-output-format set
