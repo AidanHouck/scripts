@@ -25,8 +25,14 @@ EOF
 prompt="$(cat "$PALO_USER")@Panorama> "
 prompt_3x="${prompt}${prompt}${prompt}"
 
+red=$'\e[31m'
+green=$'\e[32m'
+reset=$'\e[0m'
+
 printf %s "$ssh_output" | \
 	tr '\n' '~' | \
 	sed 's/.*'"${prompt_3x}"'\(.*\)'"${prompt}"'/\1/g' | \
-	tr '~' '\n'
+	tr '~' '\n' |\
+	sed 's/^+.*$/'"${green}"'&'"${reset}"'/' |\
+	sed 's/^-.*$/'"${red}"'&'"${reset}"'/'
 
