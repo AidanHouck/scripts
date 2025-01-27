@@ -127,17 +127,17 @@ cidr-split() {
 		cidr_i=$cidr
 		while :; do
 			if [ "$cidr_i" -ge 8 ]; then
-				maskOctet[$i]=255
+				maskOctet[i]=255
 				cidr_i=$((cidr_i-8))
 			else
-				maskOctet[$i]=${maskValues[$cidr_i]}
+				maskOctet[i]=${maskValues[$cidr_i]}
 				break
 			fi
 			i=$((i+1))
 		done
 
 		# remove the cidr from global var $address
-		address=$(echo $address | sed 's/\/.*$//g')
+		address=$(echo "$address" | sed 's/\/.*$//g')
 
 		# don't forget to build the full $mask string, other functions look at that for validation
 		mask=${maskOctet[0]}.${maskOctet[1]}.${maskOctet[2]}.${maskOctet[3]}
@@ -189,9 +189,9 @@ separate() {
 		value="$(echo "$addr" | cut -d'.' -f "$((i+1))")"
 
 		if [ "$addressType" == "address" ]; then
-			addrOctet[$i]="$value"
+			addrOctet[i]="$value"
 		elif [ "$addressType" == "mask" ]; then
-			maskOctet[$i]="$value"
+			maskOctet[i]="$value"
 		else
 			echo "Error in func separate()!!" && exit 1
 		fi
@@ -312,9 +312,7 @@ echo_subnetting () {
 	# Perform and display results of subnetting operations on $address with $mask
 	network_addr=
 	broadcast_addr=
-	first_addr=
-	last_addr=
-	num_hosts=
+	num_addrs=
 
 	i=0
 	while [ "$i" -lt "4" ]; do
@@ -352,13 +350,14 @@ echo_subnetting () {
 	done
 
 	# Tidy up IP addresses
-	network_addr=$(echo "$network_addr" | sed 's/^.//g')
-	broadcast_addr=$(echo "$broadcast_addr" | sed 's/^.//g')
+	network_addr=${network_addr:1}
+	broadcast_addr=${broadcast_addr:1}
+	num_addrs=$((2 ** (32 - cidr)))
 
 	# display
 	echo The network address is "$network_addr"
 	echo The broadcast address is "$broadcast_addr"
-	echo There are $((2 ** (32 - cidr))) addresses in the subnet \($((2 ** (32 - cidr) - 2)) usable\)
+	echo There are "$num_addrs" addresses in the subnet \($((num_addrs - 2)) usable\)
 }
 
 if [ -z "$1" ]; then
