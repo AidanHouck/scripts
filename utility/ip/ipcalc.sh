@@ -141,40 +141,41 @@ cidr-split() {
 
 		# don't forget to build the full $mask string, other functions look at that for validation
 		mask=${maskOctet[0]}.${maskOctet[1]}.${maskOctet[2]}.${maskOctet[3]}
-	else
-		# Define and return cidr anyways for ease of use in other functions
-		if [ -n "$mask" ]; then
-			# verify mask is valid & split to array
-			verify-mask "$mask"
+	elif [ -n "$mask" ]; then
+		# If no `/x` given check if we have a mask
+		# verify mask is valid & split to array
+		verify-mask "$mask"
 
-			# fill out mask octets based on CIDR given
-			i=0
-			cidr=0
-			while :; do
-				# TODO: this sucks do this better
-				if [ "${maskOctet[$i]}" -eq 255 ]; then
-					cidr=$((cidr+8))
-				elif [ "${maskOctet[$i]}" -eq 254 ]; then
-					cidr=$((cidr+7))
-				elif [ "${maskOctet[$i]}" -eq 252 ]; then
-					cidr=$((cidr+6))
-				elif [ "${maskOctet[$i]}" -eq 248 ]; then
-					cidr=$((cidr+5))
-				elif [ "${maskOctet[$i]}" -eq 240 ]; then
-					cidr=$((cidr+4))
-				elif [ "${maskOctet[$i]}" -eq 224 ]; then
-					cidr=$((cidr+3))
-				elif [ "${maskOctet[$i]}" -eq 192 ]; then
-					cidr=$((cidr+2))
-				elif [ "${maskOctet[$i]}" -eq 128 ]; then
-					cidr=$((cidr+1))
-				elif [ "${maskOctet[$i]}" -eq 0 ]; then
-					break
-				fi
+		# fill out mask octets based on CIDR given
+		i=0
+		cidr=0
+		while :; do
+			# TODO: this sucks do this better
+			if [ "${maskOctet[$i]}" -eq 255 ]; then
+				cidr=$((cidr+8))
+			elif [ "${maskOctet[$i]}" -eq 254 ]; then
+				cidr=$((cidr+7))
+			elif [ "${maskOctet[$i]}" -eq 252 ]; then
+				cidr=$((cidr+6))
+			elif [ "${maskOctet[$i]}" -eq 248 ]; then
+				cidr=$((cidr+5))
+			elif [ "${maskOctet[$i]}" -eq 240 ]; then
+				cidr=$((cidr+4))
+			elif [ "${maskOctet[$i]}" -eq 224 ]; then
+				cidr=$((cidr+3))
+			elif [ "${maskOctet[$i]}" -eq 192 ]; then
+				cidr=$((cidr+2))
+			elif [ "${maskOctet[$i]}" -eq 128 ]; then
+				cidr=$((cidr+1))
+			elif [ "${maskOctet[$i]}" -eq 0 ]; then
+				break
+			fi
 
-				i=$((i+1))
-			done
-		fi
+			i=$((i+1))
+		done
+	elif [ -z "$cidr" ]; then
+		# No cidr or mask defined, assume /32
+		cidr=32
 	fi
 }
 
@@ -410,7 +411,7 @@ if [ -n "$FLAG_IS_PUBLIC" ]; then
 	fi
 fi
 
-if [ -n "$mask" ]; then
+if [ -n "$mask" ] && [ "$cidr" -lt 32 ]; then
 	echo Subnet mask "${maskOctet[0]}.${maskOctet[1]}.${maskOctet[2]}.${maskOctet[3]}" is valid, "$cidr" in CIDR notation
 	echo_subnetting
 fi
