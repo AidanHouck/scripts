@@ -1,6 +1,7 @@
 #!/usr/bin/env nix-shell
 #! nix-shell -i bash
 #! nix-shell -p bash sshpass
+# shellcheck shell=bash
 
 # Query Panorama for pending changes via SSH
 set -eou pipefail
