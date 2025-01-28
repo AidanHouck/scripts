@@ -29,10 +29,22 @@ red=$'\e[31m'
 green=$'\e[32m'
 reset=$'\e[0m'
 
+# Check if we have bat, fallback to $PAGER then less
+if type bat >/dev/null 2>&1; then
+	pager="bat -p"
+else
+	if [ -n "$PAGER" ]; then
+		pager="$PAGER"
+	else
+		pager="less"
+	fi
+fi
+
 printf %s "$ssh_output" | \
 	tr '\n' '~' | \
 	sed 's/.*'"${prompt_3x}"'\(.*\)'"${prompt}"'/\1/g' | \
 	tr '~' '\n' |\
 	sed 's/^+.*$/'"${green}"'&'"${reset}"'/' |\
-	sed 's/^-.*$/'"${red}"'&'"${reset}"'/'
+	sed 's/^-.*$/'"${red}"'&'"${reset}"'/' |\
+	$pager
 
