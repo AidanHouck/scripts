@@ -210,7 +210,6 @@ main () {
 	already_dropped=
 	if [[ $rule = "rule,Drop identified bad actors" ]]; then
 		already_dropped=1
-		#TODO find subnet match in objects
 	else
 		# Save dport, proto, and country to use later
 		dport=$(sed -n "s/^dport,\(\S*\).*$/\1/p" <<< "$response")
@@ -315,8 +314,8 @@ main () {
 	echo "SOC Reponse"
 	echo "-----------------------"
 	if [[ -n "${already_dropped}" ]]; then
-		echo "TODO: FIND SUBNET IN OBJECTS!!!"
 		echo "1. Subnet already being dropped."
+		./palo_find_object.sh "${1}"
 		exit 0
 	elif [[ -n "${dont_drop-}" ]]; then
 		echo "1. Benign"
