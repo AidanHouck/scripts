@@ -46,5 +46,6 @@ printf %s "$ssh_output" | \
 	tr '~' '\n' |\
 	sed 's/^+.*$/'"${green}"'&'"${reset}"'/' |\
 	sed 's/^-.*$/'"${red}"'&'"${reset}"'/' |\
+	grep -v "Drop identified bad actors" |\
 	$pager
 
