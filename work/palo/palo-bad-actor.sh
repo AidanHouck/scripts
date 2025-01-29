@@ -118,13 +118,13 @@ update_pan_rule_audit_comment() {
 }
 
 # Preview panorama config diff
-preview_pan_diff() {
+commit_changes() {
 	while read_xml; do
 		echo "$ENTITY->$CONTENT"
 	done < <(curl -H "X-PAN-KEY: $(cat "$PALO_API")" \
 		-X POST "https://${PANO}/api" \
-		--data-urlencode "type=op" \
-		--data-urlencode "cmd=<show><config><candidate/></config></show>" \
+		--data-urlencode "type=commit" \
+		--data-urlencode "cmd=<commit-all></commit-all>" \
 		-s)
 }
 
@@ -381,25 +381,26 @@ main () {
 	update_pan_rule_audit_comment
 
 	# Preview diff
-	#preview_pan_diff # We probably need to grab running+grab candidate->diff for this
+	read -rp "Preview diff? (y/n) " choice
+	finish="-1"
+	while [ "$finish" = "-1" ]; do
+		case "$choice" in
+		  y|Y ) ./palo-config-audit.sh; finish=1;;
+		  n|N ) echo "Exiting..."; exit 0;;
+		  * ) echo ""; read -rp "Invalid selection. Preview diff? (y/n) " choice;;
+		esac
+	done
 
 	# Tell user to go to the web gui and commit
-	#TODO
-
-	# Print Palo object properites in console
-	#if [[ -z "${already_dropped}" ]]; then
-	#	echo ""
-	#	echo "-----------------------"
-	#	echo "Palo Alto"
-	#	echo "-----------------------"
-	#	echo "Name: ${obj_name}"
-	#	echo "Description: ${ip}"
-	#	echo "Type: ${subnet}"
-	#	echo "Tags: Bad-Actor"
-	#	echo "Audit Comment: ${audit_comment}"
-	#	echo ""
-	#fi
-
+	read -rp "Commit changes? (y/n) " choice
+	finish="-1"
+	while [ "$finish" = "-1" ]; do
+		case "$choice" in
+		  y|Y ) commit_changes; finish=1;;
+		  n|N ) echo "Exiting..."; exit 0;;
+		  * ) echo ""; read -rp "Invalid selection. Commit changes? (y/n) " choice;;
+		esac
+	done
 }
 
 # Verify usage
