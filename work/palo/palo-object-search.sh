@@ -33,7 +33,7 @@ current_subnets=$(printf %s "$ssh_output" | \
 	sed 's/^.*\(ip-netmask\|range\) \(.*\)$/\2/g')
 
 while IFS= read -r cidr; do
-	if MATCH=$(grepcidr $cidr <(echo $1)); then
+	if grepcidr "$cidr" <<< "$1" 1>/dev/null; then
 		echo "$cidr"
 		break
 	fi
