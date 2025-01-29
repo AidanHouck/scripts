@@ -1,6 +1,0 @@
-#!/usr/bin/env nix-shell
-#! nix-shell -i runhaskell
-#! nix-shell -p ghc
-
-main = putStrLn "Hello World"
-
