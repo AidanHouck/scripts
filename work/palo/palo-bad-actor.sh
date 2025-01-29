@@ -5,9 +5,7 @@ set -eou pipefail
 
 readonly PALO_USER='.palo_user'
 readonly PALO_API='.palo_api'
-
-PANO="$(cat .palo_fqdn)"
-readonly PANO
+readonly PALO_FQDN='.palo_fqdn'
 
 # Check if anyone else has a lock
 check_pan_lock() {
@@ -404,7 +402,22 @@ main () {
 
 # Verify usage
 [ $# -eq 0 ] && echo "Usage: $0 <IP Address>" && exit 1
-# TODO: Verify the needed hardcoded files exist
+
+if [[ ! -f "${PALO_USER}" ]]; then
+	echo "ERROR: $PALO_USER does not exist!"
+	echo "echo username > $PALO_USER"
+	exit 1
+fi
+
+if [[ ! -f "${PALO_FQDN}" ]]; then
+	echo "ERROR: $PALO_FQDN does not exist!"
+	echo "echo panorama.fqdn.tld > $PALO_FQDN"
+	exit 1
+fi
+
+PANO="$(cat "${PALO_FQDN}")"
+readonly PANO
+
 ./palo-api-key.sh
 main "${1}"
 
