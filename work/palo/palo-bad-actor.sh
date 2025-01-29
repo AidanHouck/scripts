@@ -294,7 +294,7 @@ main () {
 		obj_name="${name}-${subnet/\//_}"
 	fi
 
-	if [[ -z "${dont_drop}" ]]; then
+	if [[ -z "${dont_drop-}" ]]; then
 		# Check lock
 		lock=$(check_pan_lock)
 		if [[ -n $lock ]]; then
@@ -318,7 +318,7 @@ main () {
 		echo "TODO: FIND SUBNET IN OBJECTS!!!"
 		echo "1. Subnet already being dropped."
 		exit 0
-	elif [[ -n "${dont_drop}" ]]; then
+	elif [[ -n "${dont_drop-}" ]]; then
 		echo "1. Benign"
 		exit 0
 	else
