@@ -313,7 +313,7 @@ main () {
 	echo "-----------------------"
 	if [[ -n "${already_dropped}" ]]; then
 		echo "1. Subnet already being dropped."
-		./palo_find_object.sh "${1}"
+		./palo-object-search.sh "${1}"
 		exit 0
 	elif [[ -n "${dont_drop-}" ]]; then
 		echo "1. Benign"
