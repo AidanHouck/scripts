@@ -252,6 +252,16 @@ main () {
 		name=""
 		bgp_tools_lookup "${ip}"
 
+		# Cleanup invalid characters
+		name=$(echo "$name" | tr -cd '[:alnum:]\. \-_')
+		name_len=$(( ${#name} + ${#subnet} + 1 ))
+
+		# Name is too long, truncate
+		if [[ $name_len -gt 63 ]]; then
+			trunc_len=$(( $name_len - 63 ))
+			name=$(head -c $(( ${#name} - 7 )) <<<"$name")
+		fi
+
 		# Check if we may not want to drop the whole subnet
 		display_name=
 		dont_drop=
