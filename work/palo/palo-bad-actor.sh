@@ -3,10 +3,6 @@
 # Interact with Palo Alto API for SOC alerts
 set -eou pipefail
 
-readonly PALO_USER='.palo_user'
-readonly PALO_API='.palo_api'
-readonly PALO_FQDN='.palo_fqdn'
-
 # Check if anyone else has a lock
 check_pan_lock() {
 	# Check config lock
@@ -204,6 +200,12 @@ main () {
 
 	# Request a single log to check if it matches the existing rule
 	response=$(query_logs "(addr.src in '${ip}')" 1)
+
+	if [[ -z "${response}" ]]; then
+		echo "Error: No traffic found from IP ${ip}!"
+		return 0
+	fi
+
 	rule=$(grep -E "rule,.+" <<< "$response")
 	already_dropped=
 	if [[ $rule = "rule,Drop identified bad actors" ]]; then
@@ -309,7 +311,7 @@ main () {
 				echo "There is a lock but it is me ($user), continue."
 			else
 				echo "User $user has a lock, not making any changes."
-				exit 0
+				return 0
 			fi
 		else
 			echo "No Panorama locks found"
@@ -323,10 +325,10 @@ main () {
 	if [[ -n "${already_dropped}" ]]; then
 		echo "1. Subnet already being dropped."
 		./palo-object-search.sh "${1}"
-		exit 0
+		return 0
 	elif [[ -n "${dont_drop-}" ]]; then
 		echo "1. Benign"
-		exit 0
+		return 0
 	else
 		if [[ -n "${random_ports}" ]]; then
 			echo -n "5. Random ports from "
@@ -354,7 +356,7 @@ main () {
 	while [ "$finish" = "-1" ]; do
 		case "$choice" in
 		  y|Y ) echo "Creating object..."; create_pan_object; finish=1;;
-		  n|N ) echo "Exiting..."; exit 0;;
+		  n|N ) echo "Exiting..."; return 0;;
 		  * ) echo ""; read -rp "Invalid selection. Create object? (y/n) " choice;;
 		esac
 	done
@@ -392,7 +394,7 @@ main () {
 	while [ "$finish" = "-1" ]; do
 		case "$choice" in
 		  y|Y ) ./palo-config-audit.sh; finish=1;;
-		  n|N ) echo "Exiting..."; exit 0;;
+		  n|N ) echo "Exiting..."; return 0;;
 		  * ) echo ""; read -rp "Invalid selection. Preview diff? (y/n) " choice;;
 		esac
 	done
@@ -402,16 +404,22 @@ main () {
 	finish="-1"
 	while [ "$finish" = "-1" ]; do
 		case "$choice" in
-		  y|Y ) commit_changes; finish=1;;
-		  n|N ) echo "Exiting..."; exit 0;;
+		  y|Y ) commit_changes; exit 0;;
+		  n|N ) echo "Exiting..."; return 0;;
 		  * ) echo ""; read -rp "Invalid selection. Commit changes? (y/n) " choice;;
 		esac
 	done
 }
 
-# Verify usage
-[ $# -eq 0 ] && echo "Usage: $0 <IP Address>" && exit 1
+# Define constants
+readonly PALO_USER='.palo_user'
+readonly PALO_API='.palo_api'
+readonly PALO_FQDN='.palo_fqdn'
 
+PANO="$(cat "${PALO_FQDN}")"
+readonly PANO
+
+# Verify needed files exists
 if [[ ! -f "${PALO_USER}" ]]; then
 	echo "ERROR: $PALO_USER does not exist!"
 	echo "echo username > $PALO_USER"
@@ -424,9 +432,25 @@ if [[ ! -f "${PALO_FQDN}" ]]; then
 	exit 1
 fi
 
-PANO="$(cat "${PALO_FQDN}")"
-readonly PANO
-
+# Generate/verify API key
 ./palo-api-key.sh
-main "${1}"
+
+if [ $# -eq 0 ]; then
+	# No IP provided, loop and gather user input
+	read -rp "Enter IP to search (n to exit): " input
+	finish="-1"
+	while : ; do
+		if [[ $input =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+			main "${input}"
+			input=""
+		elif [[ "${input,,}" = "n" ]]; then
+			exit
+		else
+		  read -rp "Enter IP to search (n to exit): " input
+		fi
+	done
+else
+	# IP provided, run just the one command
+	main "${1}"
+fi
 
