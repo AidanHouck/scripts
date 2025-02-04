@@ -258,7 +258,6 @@ main () {
 
 		# Name is too long, truncate
 		if [[ $name_len -gt 63 ]]; then
-			trunc_len=$(( $name_len - 63 ))
 			name=$(head -c $(( ${#name} - 7 )) <<<"$name")
 		fi
 
