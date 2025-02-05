@@ -41,30 +41,6 @@ create_pan_object() {
 		-s)
 }
 
-# Create a new object via REST API
-create_pan_object_rest() {
-	curl -H "X-PAN-KEY: $(cat "$PALO_API")" \
-		-H "Content-Type: application/json" \
-		-X POST \
-		"https://${PANO}/restapi/v11.0/Objects/Addresses?location=device-group&device-group=On-Prem-DG&name=${obj_name/ /%20}" \
-		--data '{
-    "entry": [
-        {
-            "ip-netmask": "'"${subnet}"'",
-            "@name": "'"${obj_name}"'",
-            "@location": "On-Prem-DG",
-            "description": "'"${ip}"'",
-            "tag": {
-                "member": [
-                    "Bad-Actor"
-                ]
-            }
-        }
-    ]
-}'
-	echo ""
-}
-
 # Add pan object to existing rule
 add_pan_object_to_rule() {
 	while read_xml; do
