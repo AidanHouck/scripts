@@ -2,3 +2,5 @@
 .palo_fqdn
 .palo_user
 .palo_pass
+
+**/*.swp
