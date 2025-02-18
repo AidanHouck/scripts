@@ -323,6 +323,7 @@ main () {
 	fi
 
 	# Create object
+	num_changes=$((num_changes+1))
 	xpath_value="/config/devices/entry[@name='localhost.localdomain']/device-group/entry[@name='On-Prem-DG']/address/entry[@name='${obj_name}']"
 	element_value="<description>${ip}</description><tag><member>Bad-Actor</member></tag><ip-netmask>${subnet}</ip-netmask>"
 
@@ -363,28 +364,6 @@ main () {
 	echo ""
 	echo "Updating audit comment"
 	update_pan_rule_audit_comment
-
-	# Preview diff
-	read -rp "Preview diff? (y/n) " choice
-	finish="-1"
-	while [ "$finish" = "-1" ]; do
-		case "$choice" in
-		  y|Y ) ./palo-config-audit.sh; finish=1;;
-		  n|N ) echo "Exiting..."; return 0;;
-		  * ) echo ""; read -rp "Invalid selection. Preview diff? (y/n) " choice;;
-		esac
-	done
-
-	# Tell user to go to the web gui and commit
-	read -rp "Commit changes? (y/n) " choice
-	finish="-1"
-	while [ "$finish" = "-1" ]; do
-		case "$choice" in
-		  y|Y ) commit_changes; exit 0;;
-		  n|N ) echo "Exiting..."; return 0;;
-		  * ) echo ""; read -rp "Invalid selection. Commit changes? (y/n) " choice;;
-		esac
-	done
 }
 
 # Define constants
@@ -394,6 +373,8 @@ readonly PALO_FQDN='.palo_fqdn'
 
 PANO="$(cat "${PALO_FQDN}")"
 readonly PANO
+
+num_changes=0
 
 # Verify needed files exists
 if [[ ! -f "${PALO_USER}" ]]; then
@@ -420,7 +401,7 @@ if [ $# -eq 0 ]; then
 			main "${input}"
 			input=""
 		elif [[ "${input,,}" = "n" ]]; then
-			exit
+			break
 		else
 		  read -rp "Enter IP to search (n to exit): " input
 		fi
@@ -430,3 +411,26 @@ else
 	main "${1}"
 fi
 
+if [[ $num_changes -gt 0 ]]; then
+	# Preview diff
+	read -rp "Preview diff? (y/n) " choice
+	finish="-1"
+	while [ "$finish" = "-1" ]; do
+		case "$choice" in
+		  y|Y ) ./palo-config-audit.sh; finish=1;;
+		  n|N ) echo "Exiting..."; exit 0;;
+		  * ) echo ""; read -rp "Invalid selection. Preview diff? (y/n) " choice;;
+		esac
+	done
+
+	# Tell user to go to the web gui and commit
+	read -rp "Commit changes? (y/n) " choice
+	finish="-1"
+	while [ "$finish" = "-1" ]; do
+		case "$choice" in
+		  y|Y ) commit_changes; exit 0;;
+		  n|N ) echo "Exiting..."; exit 0;;
+		  * ) echo ""; read -rp "Invalid selection. Commit changes? (y/n) " choice;;
+		esac
+	done
+fi
