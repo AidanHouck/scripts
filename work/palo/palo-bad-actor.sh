@@ -418,7 +418,7 @@ if [[ $num_changes -gt 0 ]]; then
 	while [ "$finish" = "-1" ]; do
 		case "$choice" in
 		  y|Y ) ./palo-config-audit.sh; finish=1;;
-		  n|N ) echo "Exiting..."; exit 0;;
+		  n|N ) echo "Skipping diff..."; finish=1;;
 		  * ) echo ""; read -rp "Invalid selection. Preview diff? (y/n) " choice;;
 		esac
 	done
@@ -434,3 +434,4 @@ if [[ $num_changes -gt 0 ]]; then
 		esac
 	done
 fi
+
