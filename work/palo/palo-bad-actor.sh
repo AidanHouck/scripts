@@ -128,29 +128,38 @@ query_logs() {
 		--data-urlencode "query=${query}" \
 		-s)
 
-	# Wait for request to finish
-	sleep 1
-
 	# Request logs using job ID
-	while read_xml; do
-		if [[ $ENTITY = "time_generated" ]] ||
-		[[ $ENTITY = "src" ]] ||
-		[[ $ENTITY = "dst" ]] ||
-		[[ $ENTITY = "rule" ]] ||
-		[[ $ENTITY =~ srcloc.+ ]] ||
-		[[ $ENTITY = "sessionid" ]] ||
-		[[ $ENTITY = "dport" ]] ||
-		[[ $ENTITY = "proto" ]] ||
-		[[ $ENTITY = "action" ]] ||
-		[[ $ENTITY = "pkts_received" ]]; then
-			echo "$ENTITY,$CONTENT"
-		fi
-	done < <(curl -H "X-PAN-KEY: $(cat "$PALO_API")" \
-		-X POST 'https://'"${PANO}"'/api' \
-		--data-urlencode "type=log" \
-		--data-urlencode "action=get" \
-		--data-urlencode "job-id=${job}" \
-		-s)
+	sleep 0.5s
+	local loop=1
+	while [[ $loop != 0 ]]; do
+		loop=0
+		while read_xml; do
+			# Status is active so it's not ready yet
+			if [[ $ENTITY = "status" ]]; then
+				if [[ $CONTENT = "ACT" ]]; then
+					loop=1
+					sleep 1s
+					break
+				fi
+			elif [[ $ENTITY = "time_generated" ]] ||
+			[[ $ENTITY = "src" ]] ||
+			[[ $ENTITY = "dst" ]] ||
+			[[ $ENTITY = "rule" ]] ||
+			[[ $ENTITY =~ srcloc.+ ]] ||
+			[[ $ENTITY = "sessionid" ]] ||
+			[[ $ENTITY = "dport" ]] ||
+			[[ $ENTITY = "proto" ]] ||
+			[[ $ENTITY = "action" ]] ||
+			[[ $ENTITY = "pkts_received" ]]; then
+				echo "$ENTITY,$CONTENT"
+			fi
+		done < <(curl -H "X-PAN-KEY: $(cat "$PALO_API")" \
+			-X POST 'https://'"${PANO}"'/api' \
+			--data-urlencode "type=log" \
+			--data-urlencode "action=get" \
+			--data-urlencode "job-id=${job}" \
+			-s)
+	done
 }
 
 # Dump XML response values
