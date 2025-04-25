@@ -129,7 +129,7 @@ query_logs() {
 		-s)
 
 	# Request logs using job ID
-	sleep 0.5s
+	sleep 1s
 	local loop=1
 	while [[ $loop != 0 ]]; do
 		loop=0
@@ -138,7 +138,8 @@ query_logs() {
 			if [[ $ENTITY = "status" ]]; then
 				if [[ $CONTENT = "ACT" ]]; then
 					loop=1
-					sleep 1s
+					printf "." 1>&2
+					sleep 1.5s
 					break
 				fi
 			elif [[ $ENTITY = "time_generated" ]] ||
@@ -160,6 +161,9 @@ query_logs() {
 			--data-urlencode "job-id=${job}" \
 			-s)
 	done
+
+	# Clear ...'s when done
+	printf "\r\e[K" 1>&2
 }
 
 # Dump XML response values
