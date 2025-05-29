@@ -291,22 +291,6 @@ main () {
 		obj_name="${name}-${subnet/\//_}"
 	fi
 
-	if [[ -z "${dont_drop-}" ]]; then
-		# Check lock
-		lock=$(check_pan_lock)
-		if [[ -n $lock ]]; then
-			user=$(sed -n "s/^.*\"\(\S*\)\".*$/\1/p" <<< "$lock")
-			if [[ $user = $(cat $PALO_USER) ]]; then
-				echo "There is a lock but it is me ($user), continue."
-			else
-				echo "User $user has a lock, not making any changes."
-				return 0
-			fi
-		else
-			echo "No Panorama locks found"
-		fi
-	fi
-
 	# Print SOC response to console
 	echo "-----------------------"
 	echo "SOC Reponse"
@@ -404,6 +388,20 @@ fi
 
 # Generate/verify API key
 ./palo-api-key.sh
+
+# Check lock before continuing
+lock=$(check_pan_lock)
+if [[ -n $lock ]]; then
+	user=$(sed -n "s/^.*\"\(\S*\)\".*$/\1/p" <<< "$lock")
+	if [[ $user = $(cat $PALO_USER) ]]; then
+		echo "There is a lock but it is me ($user), continue."
+	else
+		echo "User $user has a lock, not making any changes."
+		exit 0
+	fi
+else
+	echo "No Panorama locks found"
+fi
 
 if [ $# -eq 0 ]; then
 	# No IP provided, loop and gather user input
