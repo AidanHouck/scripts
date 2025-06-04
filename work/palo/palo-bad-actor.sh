@@ -90,7 +90,11 @@ update_pan_rule_audit_comment() {
 # Preview panorama config diff
 commit_changes() {
 	while read_xml; do
-		echo "$ENTITY->$CONTENT"
+		if [[ $ENTITY =~ response.+ ]]; then
+			echo "$ENTITY"
+		elif [[ $ENTITY = line ]]; then
+			echo "$CONTENT"
+		fi
 	done < <(curl -H "X-PAN-KEY: $(cat "$PALO_API")" \
 		-X POST "https://${PANO}/api" \
 		--data-urlencode "type=commit" \
@@ -205,8 +209,8 @@ main () {
 		dport_proto=$(sed -n "s/^proto,\(\S*\).*$/\1/p" <<< "$response")
 		srcloc=$(sed -n "s/^srcloc.*,\(.*\).*$/\1/p" <<< "$response")
 
-		# Check packets received greater than 0
-		response=$(query_logs "(addr.src in '${ip}') and (pkts_received geq '4')" 100)
+		# Check packets received with meaningful amounts of data
+		response=$(query_logs "(addr.src in '${ip}') and (pkts_received geq '4')" 1)
 		no_data_returned=
 		if [[ -z $response ]]; then
 			no_data_returned=1
@@ -446,7 +450,7 @@ if [[ $num_changes -gt 0 ]]; then
 		esac
 	done
 
-	# Tell user to go to the web gui and commit
+	# Commit changes
 	read -rp "Commit changes? (y/n) " choice
 	finish="-1"
 	while [ "$finish" = "-1" ]; do
