@@ -295,28 +295,40 @@ main () {
 	echo "-----------------------"
 	echo "SOC Reponse"
 	echo "-----------------------"
+	response=""
 	if [[ -n "${already_dropped}" ]]; then
-		echo "1. Subnet already being dropped."
-		./palo-object-search.sh "${1}"
+		response=${response}"1. Subnet already being dropped.\n"
+		response=${response}$(./palo-object-search.sh "${1}")""
+
+		echo -e "${response}" | tee >(/mnt/c/Windows/system32/clip.exe)
+		echo -e "\nCopied to clipboard"
+
 		return 0
 	elif [[ -n "${dont_drop-}" ]]; then
-		echo "1. Benign"
+		response=${response}"1. Benign"
+
+		echo -e "${response}" | tee >(/mnt/c/Windows/system32/clip.exe)
+		echo -e "\nCopied to clipboard"
+
 		return 0
 	else
 		if [[ -n "${random_ports}" ]]; then
-			echo -n "5. Random ports from "
+			response=${response}"5. Random ports from "
 		else
-			echo -n "5. ${dport_list} from "
+			response=${response}"5. ${dport_list} from "
 		fi
 		if [[ -n "${display_name}" ]]; then
-			echo -n "${name} "
+			response=${response}"${name} "
 		fi
-		echo -n "$srcloc. "
+		response=${response}"${srcloc}. "
 		if [[ -n "${no_data_returned}" ]]; then
-			echo -n "No data returned. "
+			response=${response}"No data returned. "
 		fi
-		echo "Rule updated. "
-		echo "${subnet}"
+		response=${response}"Rule updated.\n"
+		response=${response}"${subnet}"
+
+		echo -e "${response}" | tee >(/mnt/c/Windows/system32/clip.exe)
+		echo -e "\nCopied to clipboard"
 	fi
 
 	# Create object
