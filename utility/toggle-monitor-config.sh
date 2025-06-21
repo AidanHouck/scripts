@@ -14,14 +14,16 @@ if [[ -z $selection ]]; then
 
 # 3 monitors
 elif [[ $selection = 'monitors' ]]; then
+	# Set sizes
 	xrandr --auto --verbose \
 		--output DVI-D-0 --mode 1920x1080 --rate 144 --primary \
-\
-		--output DP-0 --mode 2560x1440 --scale 0.75x0.75 --rate 100 --right-of DVI-D-0 \
-\
-		--output HDMI-0 --mode 2560x1440 --scale 0.75x0.75 --rate 100 --above DP-0 --rotate inverted
+		--output DP-0 --mode 2560x1440 --scale 0.75x0.75 --rate 100 \
+		--output HDMI-0 --mode 2560x1440 --scale 0.75x0.75 --rate 100
 
-	xrandr --output HDMI-0 --pos 0x1080
+	# Set positions
+	xrandr --auto --verbose \
+		--output DP-0 --right-of DVI-D-0 \
+		--output HDMI-0 --above DP-0 --rotate inverted --pos 0x1080
 
 # single monitor
 elif [[ $selection = 'single' ]]; then
@@ -32,14 +34,16 @@ elif [[ $selection = 'single' ]]; then
 
 # 2 monitors + tv
 elif [[ $selection = 'tv' ]]; then
+	# Set sizes
 	xrandr --auto --verbose \
-		--output DVI-D-0 --mode 1920x1080 --rate 144 --primary \
-\
-		--output DP-0 --mode 2560x1440 --scale 0.75x0.75 --rate 60 --right-of DVI-D-0 \
-\
-		--output HDMI-0 --mode 2560x1440 --rate 60 --right-of DP-0 --rotate normal
+		--output DVI-D-0 --mode 1920x1080 --rate 60 --primary \
+		--output DP-0 --mode 2560x1440 --scale 0.75x0.75 --rate 60 \
+		--output HDMI-0 --mode 2560x1440 --rate 60
 
-	xrandr --output HDMI-0 --pos 3840x0
+	# Set positions
+	xrandr --auto --verbose \
+		--output DP-0 --right-of DVI-D-0 \
+		--output HDMI-0 --right-of DP-0 --rotate normal --pos 3840x0
 
 fi
 
