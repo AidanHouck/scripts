@@ -25,9 +25,10 @@ elif [[ $selection = 'monitors' ]]; then
 		--output HDMI-0 --mode 2560x1440 --scale 0.75x0.75 --rate 100
 
 	# Set positions
-	xrandr --auto --verbose \
-		--output DP-0 --right-of DVI-D-0 \
-		--output HDMI-0 --above DP-0 --rotate inverted --pos 0x1080
+	xrandr --verbose \
+		--output DVI-D-0 --pos 0x1080 \
+		--output DP-0 --pos 1920x1080 \
+		--output HDMI-0 --pos 1920x0 --rotate inverted
 
 # single monitor
 elif [[ $selection = 'single' ]]; then
