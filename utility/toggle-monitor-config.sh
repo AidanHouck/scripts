@@ -46,9 +46,12 @@ elif [[ $selection = 'tv' ]]; then
 		--output HDMI-0 --mode 2560x1440 --rate 60
 
 	# Set positions
-	xrandr --auto --verbose \
-		--output DP-0 --right-of DVI-D-0 \
-		--output HDMI-0 --right-of DP-0 --rotate normal --pos 3840x0
+	xrandr --verbose \
+		--output DVI-D-0 --pos 0x0 \
+		--output DP-0 --pos 1920x0 \
+		--output HDMI-0 --pos 3840x0 --rotate normal
+
+	read
 
 fi
 
