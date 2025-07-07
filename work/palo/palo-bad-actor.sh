@@ -235,32 +235,43 @@ main () {
 		# Save dport, proto, and country to use later
 		dport=$(sed -n "s/^dport,\(\S*\).*$/\1/p" <<< "$response")
 		dport_proto=$(sed -n "s/^proto,\(\S*\).*$/\1/p" <<< "$response")
+		dport_list="${dport_proto}/${dport}"
 		srcloc=$(sed -n "s/^srcloc.*,\(.*\).*$/\1/p" <<< "$response")
 
-		# Check packets received with meaningful amounts of data
-		response=$(query_logs "(addr.src in '${ip}') and (pkts_received geq '4')" 1)
-		no_data_returned=
-		if [[ -z $response ]]; then
-			no_data_returned=1
-		fi
+		filter_base="(addr.src in '${ip}') and (port.dst neq '${dport}')"
 
 		# Loop and check for ports used
-		dport_list="${dport_proto}/${dport}"
-		dport_filter="(port.dst neq '${dport}')"
+		dport_filter=""
 		found_all_ports=
+		no_data_returned=
 
 		for (( i=0; i<5; i++ )); do
-			response=$(query_logs "(addr.src in '${ip}') and ${dport_filter}" 1)
+			response=$(query_logs "${filter_base}${dport_filter}" 1)
+			# If no response
 			if [[ -z $response ]]; then
-				# No more ports found, we are done
-				found_all_ports=1
+				# If no response then no data returned
+				no_data_returned=1
+
+				# If this is the last search then it is random too
+				if [[ $i -eq "4" ]]; then
+					found_all_ports=1
+				fi
+
+				# Exit
 				i=5
 				continue
+
+			# If there was a response update the list and try again
 			else
 				dport=$(sed -n "s/^dport,\(\S*\).*$/\1/p" <<< "$response")
 				dport_proto=$(sed -n "s/^proto,\(\S*\).*$/\1/p" <<< "$response")
 				dport_list="${dport_list}, ${dport_proto}/${dport}"
 				dport_filter="${dport_filter} and (port.dst neq '${dport}')"
+
+				# If on last port then check traffic received numbers too
+				if [[ $i -eq "4" ]]; then
+					dport_filter="${dport_filter} and (pkts_received geq '4')"
+				fi
 			fi
 		done
 
