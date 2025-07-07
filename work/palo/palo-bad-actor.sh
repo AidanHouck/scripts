@@ -116,13 +116,20 @@ bgp_tools_lookup() {
 # Query logs with given filter and number of logs
 # query_logs (addr.src in '1.2.3.4') 1
 query_logs() {
+	local job=""
 	local query="${1}"
 	local nlogs="${2}"
+	local was_error=
 
 	# Request log job and save the job ID
 	while read_xml; do
 		if [[ $ENTITY = "job" ]]; then
 			job="${CONTENT}"
+		elif [[ $ENTITY =~ response.+error.+ ]]; then
+			echo "ERROR: $ENTITY" 1>&2
+			was_error=1
+		elif [[ $was_error ]] && [[ $ENTITY = "line" ]]; then
+			echo "$ENTITY: $CONTENT" 1>&2
 		fi
 	done < <(curl -H "X-PAN-KEY: $(cat "$PALO_API")" \
 		-X POST 'https://'"${PANO}"'/api' \
@@ -131,6 +138,17 @@ query_logs() {
 		--data-urlencode "nlogs=${nlogs}" \
 		--data-urlencode "query=${query}" \
 		-s)
+
+	# If there was an error then exit script
+	if [[ $was_error ]]; then
+		return 1
+	fi
+
+	# If we did not get a job ID then fail
+	if [[ -z "${job}" ]]; then
+		echo "ERROR: Failed to get job-id for log lookup request!"
+		return 1
+	fi
 
 	# Request logs using job ID
 	sleep 1s
@@ -146,6 +164,11 @@ query_logs() {
 					sleep 1.5s
 					break
 				fi
+			elif [[ $ENTITY =~ response.+error.+ ]]; then
+				echo "ERROR: $ENTITY" 1>&2
+				was_error=1
+			elif [[ $was_error ]] && [[ $ENTITY = "msg" ]]; then
+				echo "$ENTITY: $CONTENT" 1>&2
 			elif [[ $ENTITY = "time_generated" ]] ||
 			[[ $ENTITY = "src" ]] ||
 			[[ $ENTITY = "dst" ]] ||
@@ -165,6 +188,11 @@ query_logs() {
 			--data-urlencode "job-id=${job}" \
 			-s)
 	done
+
+	# If there was an error then exit script
+	if [[ $was_error ]]; then
+		return 1
+	fi
 
 	# Clear ...'s when done
 	printf "\r\e[K" 1>&2
