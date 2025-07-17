@@ -17,7 +17,7 @@ set cli scripting-mode on
 set cli config-output-format set
 
 configure
-show device-group On-Prem-DG address | match ip-netmask\|range
+show device-group On-Prem-DG address | match ip-netmask\|ip-range
 exit
 exit
 
@@ -30,7 +30,7 @@ current_subnets=$(printf %s "$ssh_output" | \
 	tr '\n' '~' | \
 	sed 's/.*'"${prompt}"'\(.*\)\[edit\].*/\1/g' | \
 	tr '~' '\n' |\
-	sed 's/^.*\(ip-netmask\|range\) \(.*\)$/\2/g')
+	sed 's/^.*\(ip-netmask\|ip-range\) \(.*\)$/\2/g')
 
 while IFS= read -r cidr; do
 	if grepcidr "$cidr" <<< "$1" 1>/dev/null; then
