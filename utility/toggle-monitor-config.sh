@@ -53,7 +53,7 @@ elif [[ $selection = 'tv' ]]; then
 		--output DP-1 --pos 0x1080 \
 		--output DP-2 --pos 1920x1080 \
 		--output DP-4 --pos 1920x0 --rotate inverted \
-		--output HDMI-0 --pos 3840x1080
+		--output HDMI-0 --pos 3840x1080 --rotate normal
 
 fi
 
