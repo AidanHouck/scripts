@@ -38,8 +38,8 @@ elif [[ $selection = 'monitors' ]]; then
 
 	# Set positions
 	xrandr --verbose \
-		--output DP-1 --pos 0x1440 \
-		--output DP-2 --pos 1920x1080 \
+		--output DP-1 --pos 0x1800 \
+		--output DP-2 --pos 1920x1440 \
 		--output DP-4 --pos 1920x0 --rotate inverted
 
 # 3 monitors at matching scale
