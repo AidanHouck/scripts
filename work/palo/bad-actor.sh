@@ -322,7 +322,7 @@ main () {
 			echo "Destination IPs accessed:"
 			response=$(query_logs "(addr.src in '${ip}')" 100)
 			dst=$(sed -n "s/^dst,\(.*\).*$/\1/p" <<< "$response")
-			echo "${dst}" | sort -n | uniq
+			echo "${dst}" | sort --version-sort | uniq
 
 			read -rp "Drop ${subnet}(1), ${ip}(2), or None(3)? (1/2/3) " choice
 			finish="-1"
